@@ -1,25 +1,25 @@
 import java.util.*;
 
-public class Search<Vertex> {
-    protected Set<Vertex> marked;
-    protected Map<Vertex, Vertex> edgeTo;
-    protected final Vertex source;
+public class Search<VertexDataType> {
+    protected Set<VertexDataType> marked;
+    protected Map<VertexDataType, VertexDataType> edgeTo;
+    protected final VertexDataType source;
 
-    public Search(Vertex source) {
+    public Search(VertexDataType source) {
         this.source = source;
         marked = new HashSet<>();
         edgeTo = new HashMap<>();
     }
 
-    public boolean hasPathTo(Vertex v) {
+    public boolean hasPathTo(VertexDataType v) {
         return marked.contains(v);
     }
 
-    public Iterable<Vertex> pathTo(Vertex v) {
+    public Iterable<VertexDataType> pathTo(VertexDataType v) {
         if (!hasPathTo(v)) return null;
 
-        LinkedList<Vertex> ls = new LinkedList<>();
-        for (Vertex i = v; i != source; i = edgeTo.get(i)) {
+        LinkedList<VertexDataType> ls = new LinkedList<>();
+        for (VertexDataType i = v; i != source; i = edgeTo.get(i)) {
             ls.push(i); // inverted adding
         }
 

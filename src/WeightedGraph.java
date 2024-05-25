@@ -1,8 +1,8 @@
 import java.util.*;
 
-public class WeightedGraph<Vertex> {
+public class WeightedGraph<VertexDataType> {
     private final boolean undirected;
-    private final Map<Vertex, List<Edge<Vertex>>> map = new HashMap<>();
+    private final Map<VertexDataType, Vertex<VertexDataType>> graphVerticesMap = new HashMap<>();
 
     public WeightedGraph() {
         this(true);
@@ -12,38 +12,65 @@ public class WeightedGraph<Vertex> {
         this.undirected = undirected;
     }
 
-    public void addVertex(Vertex v) {
-        if (hasVertex(v))
+    public void addVertex(VertexDataType vertexName) {
+        if (hasVertex(vertexName))
             return;
 
-        map.put(v, new LinkedList<>());
+        graphVerticesMap.put(vertexName, new Vertex<>(vertexName));
     }
 
-    public void addEdge(Vertex source, Vertex dest, double weight) {
-        if (!hasVertex(source))
-            addVertex(source);
+    //    public void addEdge(VertexDataType source, VertexDataType dest, double weight) {
+//        if (!hasVertex(source))
+//            addVertex(source);
+//
+//        if (!hasVertex(dest))
+//            addVertex(dest);
+//
+//        if (hasEdge(source, dest)
+//                || source.equals(dest))
+//            return; // reject parallels & self-loops
+//
+//        graphVerticesMap.get(source).addAdjacentVertex(new Vertex<>(dest), weight);
+//
+//        if (undirected)
+//            graphVerticesMap.get(dest).addAdjacentVertex(new Vertex<>(source), weight);
+//    }
+    public void addEdge(VertexDataType source, VertexDataType dest, double weight) {
+        Vertex<VertexDataType> sourceVertex;
+        Vertex<VertexDataType> destVertex;
 
-        if (!hasVertex(dest))
-            addVertex(dest);
+        // Проверяем, существует ли вершина source. Если нет, создаем её.
+        if (hasVertex(source)) {
+            sourceVertex = graphVerticesMap.get(source);
+        } else {
+            sourceVertex = new Vertex<>(source);
+            graphVerticesMap.put(source, sourceVertex);
+        }
 
-        if (hasEdge(source, dest)
-                || source.equals(dest))
-            return; // reject parallels & self-loops
+        if (hasVertex(dest)) {
+            destVertex = graphVerticesMap.get(dest);
+        } else {
+            destVertex = new Vertex<>(dest);
+            graphVerticesMap.put(dest, destVertex);
+        }
 
-        map.get(source).add(new Edge<>(source, dest, weight));
+        sourceVertex.addAdjacentVertex(destVertex, weight);
 
-        if (undirected)
-            map.get(dest).add(new Edge<>(dest, source, weight));
+        if (undirected) {
+            destVertex.addAdjacentVertex(sourceVertex, weight);
+        }
     }
+
+
 
     public int getVerticesCount() {
-        return map.size();
+        return graphVerticesMap.size();
     }
 
     public int getEdgesCount() {
         int count = 0;
-        for (Vertex v : map.keySet()) {
-            count += map.get(v).size();
+        for (VertexDataType v : graphVerticesMap.keySet()) {
+            count += graphVerticesMap.get(v).amountOfEdges();
         }
 
         if (undirected)
@@ -53,30 +80,28 @@ public class WeightedGraph<Vertex> {
     }
 
 
-    public boolean hasVertex(Vertex v) {
-        return map.containsKey(v);
+    public boolean hasVertex(VertexDataType v) {
+        return graphVerticesMap.containsKey(v);
     }
 
-    public boolean hasEdge(Vertex source, Vertex dest) {
+    public boolean hasEdge(VertexDataType source, VertexDataType dest) {
         if (!hasVertex(source)) return false;
 
-        return map.get(source).contains(new Edge<>(source, dest));
+        return graphVerticesMap.get(source).hasConnectionTo(new Vertex<>(dest));
     }
 
-    public List<Vertex> adjacencyList(Vertex v) {
+    public List<VertexDataType> adjacencyList(VertexDataType v) {
         if (!hasVertex(v)) return null;
 
-        List<Vertex> vertices = new LinkedList<>();
-        for (Edge<Vertex> e : map.get(v)) {
-            vertices.add(e.getDest());
-        }
-
-        return vertices;
+        return graphVerticesMap.get(v).getAdjacencyList();
     }
 
-    public Iterable<Edge<Vertex>> getEdges(Vertex v) {
-        if (!hasVertex(v)) return null;
 
-        return map.get(v);
+    public Vertex<VertexDataType> getVertex(VertexDataType data) {
+        return graphVerticesMap.get(data);
     }
+    public double getDistance(Vertex<VertexDataType> source, Vertex<VertexDataType> target) {
+        return source.getDistance(target);
+    }
+
 }

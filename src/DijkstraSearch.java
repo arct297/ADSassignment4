@@ -1,11 +1,11 @@
 import java.util.*;
 
-public class DijkstraSearch<Vertex> extends Search<Vertex> {
-    private final Set<Vertex> unsettledNodes;
-    private final Map<Vertex, Double> distances;
-    private final WeightedGraph<Vertex> graph;
+public class DijkstraSearch<VertexDataType> extends Search<VertexDataType> {
+    private final Set<VertexDataType> unsettledNodes;
+    private final Map<VertexDataType, Double> distances;
+    private final WeightedGraph<VertexDataType> graph;
 
-    public DijkstraSearch(WeightedGraph<Vertex> graph, Vertex source) {
+    public DijkstraSearch(WeightedGraph<VertexDataType> graph, VertexDataType source) {
         super(source);
         unsettledNodes = new HashSet<>();
         distances = new HashMap<>();
@@ -19,12 +19,12 @@ public class DijkstraSearch<Vertex> extends Search<Vertex> {
         unsettledNodes.add(source);
 
         while (!unsettledNodes.isEmpty()) {
-            Vertex currentNode = getVertexWithMinimumWeight(unsettledNodes);
+            VertexDataType currentNode = getVertexWithMinimumWeight(unsettledNodes);
 
             marked.add(currentNode);
             unsettledNodes.remove(currentNode);
 
-            for (Vertex neighbor : graph.adjacencyList(currentNode)) {
+            for (VertexDataType neighbor : graph.getVertex(currentNode).getAdjacencyList()) {
                 double newDistance = getShortestDistance(currentNode) + getDistance(currentNode, neighbor);
 
                 if (getShortestDistance(neighbor) > newDistance) {
@@ -36,18 +36,15 @@ public class DijkstraSearch<Vertex> extends Search<Vertex> {
         }
     }
 
-    private double getDistance(Vertex node, Vertex target) {
-        for (Edge<Vertex> edge : graph.getEdges(node)) {
-            if (edge.getDest().equals(target))
-                return edge.getWeight();
-        }
-
-        throw new RuntimeException("Not found!");
+    private double getDistance(VertexDataType node, VertexDataType target) {
+        Vertex<VertexDataType> nodeVertex = graph.getVertex(node);
+        Vertex<VertexDataType> targetVertex = graph.getVertex(target);
+        return nodeVertex.getDistance(targetVertex);
     }
 
-    private Vertex getVertexWithMinimumWeight(Set<Vertex> vertices) {
-        Vertex minimum = null;
-        for (Vertex vertex : vertices) {
+    private VertexDataType getVertexWithMinimumWeight(Set<VertexDataType> vertices) {
+        VertexDataType minimum = null;
+        for (VertexDataType vertex : vertices) {
             if (minimum == null) {
                 minimum = vertex;
 
@@ -61,11 +58,8 @@ public class DijkstraSearch<Vertex> extends Search<Vertex> {
         return minimum;
     }
 
-    private double getShortestDistance(Vertex destination) {
+    private double getShortestDistance(VertexDataType destination) {
         Double d = distances.get(destination);
-
         return (d == null ? Double.MAX_VALUE : d);
     }
 }
-
-
